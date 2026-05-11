@@ -3,309 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Balanced Global Energy - IA System</title>
+    <title>BalancedGlobalEnergy</title>
     <style>
         :root {
             --primary: #00ffcc;
             --accent: #00aa88;
             --bg-dark: #111;
             --bg-map: #0a1f2e;
-            --text: #ffffff;
+            --neon-green: #00ff99;
         }
 
         body {
-            font-family: 'Segoe UI', Arial, sans-serif;
+            font-family: 'Arial', sans-serif;
             background-color: var(--bg-dark);
-            color: var(--text);
+            color: white;
             margin: 0;
             display: flex;
-            flex-direction: column;
+            justify-content: center;
             align-items: center;
             min-height: 100vh;
+            overflow: hidden;
         }
 
-        .screen { display: none; width: 100%; max-width: 1200px; padding: 20px; text-align: center; }
-        .active { display: block; }
+        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; }
+        .active { display: flex; }
 
-        h1 { color: var(--primary); font-size: 3rem; margin: 20px 0 10px 0; }
-        .subtitle { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.8; }
-
+        /* Menú Principal */
+        h1 { font-size: 38pt; font-weight: bold; color: var(--primary); margin-bottom: 10px; }
+        .subtitle { font-size: 18pt; margin-bottom: 50px; }
+        
         button {
             background-color: var(--accent);
             color: white;
             border: none;
-            padding: 15px 40px;
-            font-size: 1.2rem;
+            width: 400px;
+            height: 60px;
+            font-size: 18pt;
             font-weight: bold;
+            margin: 15px;
             cursor: pointer;
             border-radius: 5px;
-            transition: 0.3s;
-            margin: 10px;
+            transition: 0.2s;
         }
-        button:hover { background-color: var(--primary); color: #111; }
+        button:hover { filter: brightness(1.2); }
 
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; border-bottom: 1px solid #444; }
-        .tab { padding: 10px 30px; cursor: pointer; border: 1px solid transparent; transition: 0.3s; }
-        .tab.active-tab { border: 1px solid var(--primary); border-bottom: none; color: var(--primary); background: #222; }
+        /* Pestañas (Notebook) */
+        .notebook { width: 1400px; height: 850px; display: flex; flex-direction: column; }
+        .tabs { display: flex; background: #222; }
+        .tab { padding: 10px 30px; cursor: pointer; background: #333; border: 1px solid #444; }
+        .tab.active-tab { background: #111; border-bottom: none; color: var(--primary); }
+        .content { flex-grow: 1; display: none; position: relative; }
+        .content.active-content { display: block; }
 
-        #game-canvas {
-            background-color: var(--bg-map);
-            border: 2px solid #333;
-            max-width: 100%;
-            height: auto;
-            border-radius: 8px;
-        }
+        /* Mapa */
+        #map-canvas { background-color: var(--bg-map); margin-top: 10px; }
+        #timer { font-size: 18pt; font-weight: bold; margin-top: 10px; }
 
-        .console {
-            background-color: #000;
-            color: #00ff99;
-            padding: 20px;
+        /* Consola IA */
+        .pc-container { text-align: center; padding: 20px; }
+        .console-box {
+            background: black;
+            border: 5px ridge #555;
+            width: 600px;
+            height: 300px;
+            margin: 20px auto;
+            color: var(--neon-green);
             font-family: 'Consolas', monospace;
             text-align: left;
-            border: 2px solid #333;
-            margin: 20px auto;
-            max-width: 600px;
-            min-height: 250px;
-            line-height: 1.4;
+            padding: 15px;
+            overflow-y: auto;
+            white-space: pre-wrap;
         }
-
         input {
-            padding: 10px;
-            font-size: 1rem;
-            margin: 5px;
-            width: 100px;
+            font-size: 16pt;
+            padding: 5px;
+            width: 300px;
+            margin: 10px;
             background: #222;
-            color: white;
             border: 1px solid #444;
-            border-radius: 4px;
+            color: white;
+            text-align: center;
         }
 
-        .history-table { width: 100%; margin-top: 20px; border-collapse: collapse; background: #1a1a1a; }
-        .history-table th, .history-table td { border: 1px solid #444; padding: 12px; text-align: center; }
-        .history-table th { background-color: var(--accent); }
+        /* Historial */
+        .listbox {
+            background: white;
+            color: black;
+            width: 800px;
+            height: 400px;
+            overflow-y: auto;
+            font-family: 'Consolas', monospace;
+            margin: 20px;
+            text-align: left;
+            padding: 10px;
+        }
+        .list-item { padding: 5px; border-bottom: 1px solid #ccc; }
     </style>
 </head>
 <body>
 
-    <!-- MENÚ PRINCIPAL -->
+    <!-- SCREEN: MENU -->
     <div id="screen-menu" class="screen active">
         <h1>BalancedGlobalEnergy</h1>
-        <p class="subtitle">Sistema mundial de equilibrio energético</p>
-        <button onclick="startGame()">INICIAR PARTIDA</button><br>
-        <button onclick="showHistory()">PARTIDAS GUARDADAS</button>
+        <div class="subtitle">Sistema mundial de equilibrio energético</div>
+        <button onclick="iniciarPartida()">INICIAR PARTIDA</button>
+        <button onclick="verPartidas()">PARTIDAS GUARDADAS</button>
+        <button onclick="window.close()">SALIR</button>
     </div>
 
-    <!-- JUEGO -->
+    <!-- SCREEN: GAME -->
     <div id="screen-game" class="screen">
-        <div id="timer-display" style="font-size: 1.8rem; font-weight: bold; margin-bottom: 15px; color: var(--primary);">Tiempo: 0s</div>
-        
-        <div class="tabs">
-            <div id="tab-map" class="tab active-tab" onclick="switchTab('map')">Mapa Mundial</div>
-            <div id="tab-ia" class="tab" onclick="switchTab('ia')">Ordenador IA</div>
-        </div>
+        <div class="notebook">
+            <div class="tabs">
+                <div id="t-map" class="tab active-tab" onclick="switchTab('map')">Mapa Mundial</div>
+                <div id="t-pc" class="tab" onclick="switchTab('pc')">Ordenador IA</div>
+            </div>
 
-        <div id="content-map">
-            <canvas id="game-canvas" width="1000" height="600"></canvas>
-        </div>
+            <!-- Tab Mapa -->
+            <div id="c-map" class="content active-content" style="background-color: #001219; text-align: center;">
+                <div id="timer">Tiempo: 0s</div>
+                <canvas id="map-canvas" width="1300" height="700"></canvas>
+            </div>
 
-        <div id="content-ia" style="display: none;">
-            <h2>SISTEMA DE CONTROL DE IA</h2>
-            <div id="ia-console" class="console"></div>
-            <div style="background: #222; padding: 20px; border-radius: 8px; display: inline-block;">
-                <label>ID Origen (1-7): </label><input type="number" id="input-origin" min="1" max="7">
-                <label>Transferir (%): </label><input type="number" id="input-amount" step="0.1">
-                <br><br>
-                <button onclick="executeTransfer()">EJECUTAR TRANSFERENCIA</button>
+            <!-- Tab PC IA -->
+            <div id="c-pc" class="content" style="background-color: #111;">
+                <div class="pc-container">
+                    <div style="font-size: 28pt; font-weight: bold; color: var(--neon-green); font-family: Consolas;">SISTEMA DE IA ENERGÉTICA</div>
+                    <div id="info-apagado" style="font-size: 18pt; margin: 10px;">CONTINENTE APAGADO: ---</div>
+                    
+                    <div class="console-box" id="ia-text"></div>
+
+                    <label style="font-size: 14pt;">Número del continente origen</label><br>
+                    <input type="number" id="input-cont" min="1" max="7"><br>
+                    <label style="font-size: 14pt;">Porcentaje de energía a transferir</label><br>
+                    <input type="number" id="input-energia" step="0.1"><br>
+                    
+                    <button onclick="resolver()" style="width: 250px; margin-top: 20px;">EJECUTAR IA</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- PANTALLA FINAL -->
-    <div id="screen-end" class="screen">
-        <h1 style="color: var(--primary);">MISIÓN COMPLETADA</h1>
-        <div style="background: #222; padding: 30px; border-radius: 15px; display: inline-block; margin-bottom: 20px;">
-            <p id="final-stats" style="font-size: 1.8rem; margin: 0;"></p>
-        </div>
-        <br>
-        <button onclick="location.reload()">NUEVA PARTIDA</button>
+    <!-- SCREEN: FINAL -->
+    <div id="screen-final" class="screen">
+        <h1 style="color: var(--neon-green);">MISIÓN COMPLETADA</h1>
+        <div id="final-tiempo" class="subtitle" style="margin-bottom: 10px;">Tiempo empleado: 0 segundos</div>
+        <div id="final-precision" class="subtitle">Precisión energética: 0%</div>
+        <button onclick="showScreen('screen-menu')" style="margin-top: 40px;">VOLVER AL MENÚ</button>
     </div>
 
-    <!-- HISTORIAL -->
+    <!-- SCREEN: HISTORIAL -->
     <div id="screen-history" class="screen">
-        <h1>REGISTRO DE OPERACIONES</h1>
-        <div style="overflow-x: auto;">
-            <table class="history-table">
-                <thead>
-                    <tr>
-                        <th>Fecha</th>
-                        <th>Tiempo Empleado</th>
-                        <th>Precisión IA</th>
-                    </tr>
-                </thead>
-                <tbody id="history-body"></tbody>
-            </table>
-        </div>
-        <br>
-        <button onclick="showMenu()">VOLVER AL MENÚ</button>
+        <h1 style="color: white;">PARTIDAS GUARDADAS</h1>
+        <div id="history-list" class="listbox"></div>
+        <button onclick="showScreen('screen-menu')">VOLVER</button>
     </div>
 
     <script>
-        const CONTINENTES = [
-            { n: "América Norte", color: "#3498db", x: 150, y: 150, pts: [50,100, 200,80, 250,150, 230,250, 150,280] },
-            { n: "América Sur", color: "#2ecc71", x: 250, y: 450, pts: [220,320, 280,350, 300,500, 240,550, 180,450] },
-            { n: "Europa", color: "#f1c40f", x: 500, y: 150, pts: [450,100, 550,80, 580,180, 500,200, 450,150] },
-            { n: "África", color: "#e67e22", x: 520, y: 380, pts: [480,250, 600,250, 650,450, 550,550, 450,450] },
-            { n: "Asia", color: "#e74c3c", x: 800, y: 200, pts: [650,100, 950,80, 980,300, 800,350, 680,250] },
-            { n: "Oceanía", color: "#9b59b6", x: 850, y: 500, pts: [820,450, 920,450, 950,550, 850,580, 800,500] },
-            { n: "Antártida", color: "#95a5a6", x: 500, y: 570, pts: [200,570, 800,570, 800,590, 200,590] }
-        ];
+        const CONTINENTES = ["América Norte", "América Sur", "Europa", "África", "Asia", "Oceanía", "Antártida"];
+        const COLORES = {
+            "América Norte": "#3498db", "América Sur": "#2ecc71", "Europa": "#f1c40f",
+            "África": "#e67e22", "Asia": "#e74c3c", "Oceanía": "#9b59b6", "Antártida": "#95a5a6"
+        };
+        const IDEAL = 100 / CONTINENTES.length;
 
-        let energias = [];
-        let indexApagado = -1;
-        let startTime, timerInterval;
-        const IDEAL = 100 / 7;
+        let energias = {};
+        let apagado = "";
+        let startTime = 0;
+        let timerInterval;
 
         function showScreen(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
+            if(id === 'screen-menu') clearInterval(timerInterval);
         }
 
-        function startGame() {
+        function iniciarPartida() {
             showScreen('screen-game');
-            indexApagado = Math.floor(Math.random() * 7);
+            switchTab('map');
             
-            energias = new Array(7).fill(0);
-            let indicesActivos = [0,1,2,3,4,5,6].filter(i => i !== indexApagado);
-            let pool = 100;
-
-            indicesActivos.forEach((idx, i) => {
-                if (i === indicesActivos.length - 1) {
-                    energias[idx] = Math.round(pool * 10) / 10;
-                } else {
-                    let val = Math.floor(Math.random() * 15) + 8;
-                    energias[idx] = val;
-                    pool -= val;
-                }
-            });
-
-            energias[indexApagado] = 0; // Garantizamos que el apagado empiece en 0
-
             startTime = Date.now();
-            timerInterval = setInterval(updateTimer, 1000);
+            apagado = CONTINENTES[Math.floor(Math.random() * CONTINENTES.length)];
+            
+            // Lógica de repartición idéntica a Python
+            let restantes = 100;
+            let activos = CONTINENTES.filter(c => c !== apagado);
+            let porcentajes = [];
+
+            for(let i=0; i < activos.length - 1; i++) {
+                let valor = Math.floor(Math.random() * (24 - 8 + 1)) + 8;
+                porcentajes.push(valor);
+                restantes -= valor;
+            }
+            porcentajes.push(restantes);
+            porcentajes.sort(() => Math.random() - 0.5);
+
+            CONTINENTES.forEach(c => energias[c] = 0);
+            activos.forEach((c, i) => energias[c] = porcentajes[i]);
+
+            document.getElementById('info-apagado').innerText = `CONTINENTE APAGADO: ${apagado.toUpperCase()}`;
+            
+            timerInterval = setInterval(actualizarTiempo, 1000);
             updateUI();
         }
 
-        function updateTimer() {
-            let segs = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('timer-display').innerText = `Tiempo: ${segs}s`;
+        function actualizarTiempo() {
+            let tiempo = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer').innerText = `Tiempo: ${tiempo}s`;
+        }
+
+        function switchTab(tab) {
+            document.getElementById('t-map').className = tab === 'map' ? 'tab active-tab' : 'tab';
+            document.getElementById('t-pc').className = tab === 'pc' ? 'tab active-tab' : 'tab';
+            document.getElementById('c-map').className = tab === 'map' ? 'content active-content' : 'content';
+            document.getElementById('c-pc').className = tab === 'pc' ? 'content active-content' : 'content';
         }
 
         function updateUI() {
-            drawMap();
-            updateConsole();
+            renderMapa();
+            renderConsola();
         }
 
-        function drawMap() {
-            const canvas = document.getElementById('game-canvas');
+        function renderMapa() {
+            const canvas = document.getElementById('map-canvas');
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            CONTINENTES.forEach((cont, i) => {
+            ctx.fillStyle = "white";
+            ctx.font = "bold 24pt Arial";
+            ctx.textAlign = "center";
+            ctx.fillText("BALANCED GLOBAL ENERGY MAP", 650, 60);
+
+            function drawPolygon(pts, name, id, x, y) {
                 ctx.beginPath();
-                ctx.moveTo(cont.pts[0], cont.pts[1]);
-                for(let p=2; p<cont.pts.length; p+=2) ctx.lineTo(cont.pts[p], cont.pts[p+1]);
+                ctx.moveTo(pts[0], pts[1]);
+                for(let i=2; i<pts.length; i+=2) ctx.lineTo(pts[i], pts[i+1]);
                 ctx.closePath();
-                
-                ctx.fillStyle = (i === indexApagado) ? "#000000" : cont.color;
+                ctx.fillStyle = (name === apagado) ? "black" : COLORES[name];
                 ctx.fill();
                 ctx.strokeStyle = "white";
-                ctx.lineWidth = i === indexApagado ? 3 : 1;
+                ctx.lineWidth = 3;
                 ctx.stroke();
 
                 ctx.fillStyle = "white";
-                ctx.font = "bold 14px Arial";
-                ctx.shadowColor = "black";
-                ctx.shadowBlur = 4;
-                ctx.fillText(`${i+1}. ${cont.n}`, cont.x - 40, cont.y);
-                ctx.fillText(`${energias[i].toFixed(1)}%`, cont.x - 20, cont.y + 20);
-                ctx.shadowBlur = 0;
-            });
+                ctx.font = "bold 12pt Arial";
+                ctx.fillText(`${id}`, x, y-20);
+                ctx.fillText(name, x, y);
+                ctx.fillText(`${energias[name]}%`, x, y+20);
+            }
+
+            // Polígonos exactos basados en el código Tkinter
+            drawPolygon([80,120, 240,80, 310,150, 290,260, 180,320, 100,250], "América Norte", 1, 190, 190);
+            drawPolygon([260,340, 330,420, 350,560, 300,650, 240,600, 210,480], "América Sur", 2, 290, 500);
+            drawPolygon([520,120, 610,100, 660,160, 620,220, 540,200], "Europa", 3, 590, 160);
+            drawPolygon([560,260, 670,280, 720,420, 640,560, 540,520, 500,360], "África", 4, 620, 400);
+            drawPolygon([760,120, 1050,100, 1180,240, 1110,380, 980,400, 850,330, 720,220], "Asia", 5, 950, 250);
+            drawPolygon([1030,470, 1130,500, 1160,580, 1080,620, 980,570], "Oceanía", 6, 1080, 560);
+            
+            // Antártida (Rectangle)
+            ctx.fillStyle = (apagado === "Antártida") ? "black" : COLORES["Antártida"];
+            ctx.fillRect(350, 650, 600, 40);
+            ctx.strokeStyle = "white";
+            ctx.strokeRect(350, 650, 600, 40);
+            ctx.fillStyle = "white";
+            ctx.fillText(`7 Antártida ${energias["Antártida"]}%`, 650, 675);
         }
 
-        function updateConsole() {
-            let html = `> INICIANDO DIAGNÓSTICO...<br>> CONTINENTE APAGADO: <span style="color:red">${CONTINENTES[indexApagado].n.toUpperCase()}</span><br><br>`;
+        function renderConsola() {
+            let txt = "=== RED ELÉCTRICA GLOBAL ===\n\n";
             CONTINENTES.forEach((c, i) => {
-                let status = (i === indexApagado) ? "OFFLINE" : "ONLINE";
-                html += `${i+1}. ${c.n.padEnd(15, '.')} ${energias[i].toFixed(1)}% [${status}]<br>`;
+                txt += `${i+1}. ${c} --> ${energias[c]}%\n`;
             });
-            html += `<br>> OBJETIVO IDEAL: ${IDEAL.toFixed(2)}% por nodo.`;
-            document.getElementById('ia-console').innerHTML = html;
+            txt += `\nOBJETIVO IDEAL: ${IDEAL.toFixed(2)}% POR CONTINENTE`;
+            document.getElementById('ia-text').innerText = txt;
         }
 
-        function switchTab(type) {
-            document.getElementById('content-map').style.display = type === 'map' ? 'block' : 'none';
-            document.getElementById('content-ia').style.display = type === 'ia' ? 'block' : 'none';
-            document.getElementById('tab-map').className = type === 'map' ? 'tab active-tab' : 'tab';
-            document.getElementById('tab-ia').className = type === 'ia' ? 'tab active-tab' : 'tab';
+        function resolver() {
+            let idx = parseInt(document.getElementById('input-cont').value) - 1;
+            let cant = parseFloat(document.getElementById('input-energia').value);
+
+            if(isNaN(idx) || idx < 0 || idx >= 7) return;
+            let origen = CONTINENTES[idx];
+
+            if(origen === apagado || cant <= 0 || energias[origen] < cant) {
+                alert("Operación inválida: Verifique ID o Energía disponible");
+                return;
+            }
+
+            energias[origen] = parseFloat((energias[origen] - cant).toFixed(1));
+            energias[apagado] = parseFloat((energias[apagado] + cant).toFixed(1));
+
+            let diferencia = 0;
+            CONTINENTES.forEach(c => diferencia += Math.abs(energias[c] - IDEAL));
+            let precision = Math.max(0, Math.floor(100 - diferencia * 2));
+            let tiempo = Math.floor((Date.now() - startTime) / 1000);
+
+            guardarPartida(tiempo, precision);
+            
+            document.getElementById('final-tiempo').innerText = `Tiempo empleado: ${tiempo} segundos`;
+            document.getElementById('final-precision').innerText = `Precisión energética: ${precision}%`;
+            showScreen('screen-final');
         }
 
-        function executeTransfer() {
-            let originIdx = parseInt(document.getElementById('input-origin').value) - 1;
-            let amount = parseFloat(document.getElementById('input-amount').value);
-
-            if (isNaN(originIdx) || originIdx < 0 || originIdx > 6 || originIdx === indexApagado) {
-                alert("ERROR: ID de origen inválido o nodo fuera de servicio."); return;
-            }
-            if (isNaN(amount) || amount <= 0 || amount > energias[originIdx]) {
-                alert("ERROR: Cantidad energética insuficiente en el nodo de origen."); return;
-            }
-
-            energias[originIdx] = Math.round((energias[originIdx] - amount) * 10) / 10;
-            energias[indexApagado] = Math.round((energias[indexApagado] + amount) * 10) / 10;
-
-            updateUI();
-            
-            let diff = energias.reduce((acc, val) => acc + Math.abs(val - IDEAL), 0);
-            let precision = Math.max(0, Math.floor(100 - diff * 2));
-            
-            if (precision >= 85) {
-                setTimeout(() => finishGame(precision), 500);
-            } else {
-                alert(`Transferencia exitosa. Precisión del sistema: ${precision}%.\n(Necesitas >85% para completar la misión)`);
-            }
-        }
-
-        function finishGame(precision) {
-            clearInterval(timerInterval);
-            let totalTime = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('final-stats').innerText = `Tiempo: ${totalTime}s | Precisión: ${precision}%`;
-            
-            let history = JSON.parse(localStorage.getItem('energy_history') || '[]');
-            history.push({ 
-                date: new Date().toLocaleDateString() + " " + new Date().toLocaleTimeString(), 
-                time: totalTime, 
-                precision: precision 
+        function guardarPartida(t, p) {
+            let partidas = JSON.parse(localStorage.getItem('partidas_energy') || '[]');
+            let ahora = new Date();
+            partidas.push({
+                fecha: ahora.toISOString().split('T')[0],
+                hora: ahora.toTimeString().split(' ')[0],
+                tiempo: t,
+                precision: p
             });
-            localStorage.setItem('energy_history', JSON.stringify(history));
-
-            showScreen('screen-end');
+            localStorage.setItem('partidas_energy', JSON.stringify(partidas));
         }
 
-        function showHistory() {
+        function verPartidas() {
             showScreen('screen-history');
-            let history = JSON.parse(localStorage.getItem('energy_history') || '[]');
-            let tbody = document.getElementById('history-body');
-            tbody.innerHTML = history.reverse().map(h => `
-                <tr>
-                    <td>${h.date}</td>
-                    <td>${h.time} segundos</td>
-                    <td>${h.precision}%</td>
-                </tr>
-            `).join('');
-            if(history.length === 0) tbody.innerHTML = "<tr><td colspan='3'>No hay registros disponibles.</td></tr>";
+            let partidas = JSON.parse(localStorage.getItem('partidas_energy') || '[]');
+            let list = document.getElementById('history-list');
+            list.innerHTML = "";
+            
+            if(partidas.length === 0) {
+                list.innerHTML = "<div class='list-item'>No hay partidas guardadas</div>";
+            } else {
+                partidas.reverse().forEach(p => {
+                    list.innerHTML += `<div class='list-item'>${p.fecha} ${p.hora} | Tiempo: ${p.tiempo}s | Precisión: ${p.precision}%</div>`;
+                });
+            }
         }
-
-        function showMenu() { showScreen('screen-menu'); }
     </script>
 </body>
 </html>
