@@ -3,334 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Código Fuente - BalancedGlobalEnergy</title>
-    <!-- Estilos para el resaltado de sintaxis (Tema Dark) -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <title>Balanced Global Energy - IA System</title>
     <style>
+        :root {
+            --primary: #00ffcc;
+            --accent: #00aa88;
+            --bg-dark: #111;
+            --bg-map: #0a1f2e;
+            --text: #ffffff;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #1a1a1a;
-            color: #eee;
-            line-height: 1.6;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text);
             margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        /* Pantallas */
+        .screen { display: none; width: 100%; max-width: 1200px; padding: 20px; text-align: center; }
+        .active { display: block; }
+
+        h1 { color: var(--primary); font-size: 3rem; margin-bottom: 10px; }
+        .subtitle { font-size: 1.2rem; margin-bottom: 30px; opacity: 0.8; }
+
+        /* Botones */
+        button {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: 0.3s;
+            margin: 10px;
+        }
+        button:hover { background-color: var(--primary); color: #111; }
+
+        /* Tab Layout */
+        .tabs { display: flex; justify-content: center; margin-bottom: 20px; border-bottom: 1px solid #444; }
+        .tab { padding: 10px 30px; cursor: pointer; border: 1px solid transparent; }
+        .tab.active-tab { border: 1px solid var(--primary); border-bottom: none; color: var(--primary); }
+
+        /* Mapa y Canvas */
+        #game-canvas {
+            background-color: var(--bg-map);
+            border: 2px solid #333;
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Consola IA */
+        .console {
+            background-color: #000;
+            color: #00ff99;
             padding: 20px;
+            font-family: 'Consolas', monospace;
+            text-align: left;
+            border: 2px solid #333;
+            margin: 20px auto;
+            max-width: 600px;
+            min-height: 200px;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
+
+        input {
+            padding: 10px;
+            font-size: 1rem;
+            margin: 5px;
+            width: 80px;
+            background: #222;
+            color: white;
+            border: 1px solid #444;
         }
-        h1 {
-            color: #00ffcc;
-            border-bottom: 2px solid #00aa88;
-            padding-bottom: 10px;
-        }
-        .description {
-            background: #252525;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            border-left: 5px solid #00aa88;
-        }
-        pre {
-            border-radius: 8px;
-            font-size: 14px !important;
-        }
+
+        .stats-list { list-style: none; padding: 0; }
+        .history-table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+        .history-table th, .history-table td { border: 1px solid #444; padding: 10px; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>BalancedGlobalEnergy</h1>
-    <div class="description">
-        <p><strong>Script de Python:</strong> Sistema mundial de equilibrio energético desarrollado con <code>tkinter</code>.</p>
+    <div id="screen-menu" class="screen active">
+        <h1>BalancedGlobalEnergy</h1>
+        <p class="subtitle">Sistema mundial de equilibrio energético</p>
+        <button onclick="startGame()">INICIAR PARTIDA</button><br>
+        <button onclick="showHistory()">PARTIDAS GUARDADAS</button>
     </div>
 
-    <!-- Bloque de código -->
-    <pre><code class="language-python">
-import tkinter as tk
-from tkinter import ttk
-import random
-import time
-import json
-import os
-from datetime import datetime
+    <div id="screen-game" class="screen">
+        <div id="timer-display" style="font-size: 1.5rem; font-weight: bold; margin-bottom: 10px;">Tiempo: 0s</div>
+        
+        <div class="tabs">
+            <div id="tab-map" class="tab active-tab" onclick="switchTab('map')">Mapa Mundial</div>
+            <div id="tab-ia" class="tab" onclick="switchTab('ia')">Ordenador IA</div>
+        </div>
 
-NOMBRE_JUEGO = "BalancedGlobalEnergy"
+        <div id="content-map">
+            <canvas id="game-canvas" width="1000" height="600"></canvas>
+        </div>
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-ARCHIVO_PARTIDAS = os.path.join(BASE_DIR, "partidas.json")
+        <div id="content-ia" style="display: none;">
+            <h2>SISTEMA DE IA ENERGÉTICA</h2>
+            <div id="ia-console" class="console"></div>
+            <div style="margin-top: 20px;">
+                <label>Número Origen: </label><input type="number" id="input-origin" min="1" max="7">
+                <label>Cantidad (%): </label><input type="number" id="input-amount" min="1">
+                <br><br>
+                <button onclick="executeTransfer()">EJECUTAR IA</button>
+            </div>
+        </div>
+    </div>
 
-CONTINENTES = [
-    "América Norte",
-    "América Sur",
-    "Europa",
-    "África",
-    "Asia",
-    "Oceanía",
-    "Antártida"
-]
+    <div id="screen-end" class="screen">
+        <h1 style="color: var(--primary);">MISIÓN COMPLETADA</h1>
+        <p id="final-stats" style="font-size: 1.5rem;"></p>
+        <button onclick="location.reload()">VOLVER AL MENÚ</button>
+    </div>
 
-IDEAL = 100 / len(CONTINENTES)
+    <div id="screen-history" class="screen">
+        <h1>HISTORIAL DE PARTIDAS</h1>
+        <table class="history-table" id="history-body">
+            <thead>
+                <tr>
+                    <th>Fecha</th>
+                    <th>Tiempo</th>
+                    <th>Precisión</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <br>
+        <button onclick="showMenu()">VOLVER</button>
+    </div>
 
-class Juego:
-    def __init__(self, root):
-        self.root = root
-        self.root.title(NOMBRE_JUEGO)
-        self.root.geometry("1400x850")
-        self.root.configure(bg="#111")
-        self.menu_principal()
+    <script>
+        const CONTINENTES = [
+            { n: "América Norte", color: "#3498db", x: 150, y: 150, pts: [50,100, 200,80, 250,150, 230,250, 150,280] },
+            { n: "América Sur", color: "#2ecc71", x: 250, y: 450, pts: [220,320, 280,350, 300,500, 240,550, 180,450] },
+            { n: "Europa", color: "#f1c40f", x: 500, y: 150, pts: [450,100, 550,80, 580,180, 500,200, 450,150] },
+            { n: "África", color: "#e67e22", x: 520, y: 380, pts: [480,250, 600,250, 650,450, 550,550, 450,450] },
+            { n: "Asia", color: "#e74c3c", x: 800, y: 200, pts: [650,100, 950,80, 980,300, 800,350, 680,250] },
+            { n: "Oceanía", color: "#9b59b6", x: 850, y: 500, pts: [820,450, 920,450, 950,550, 850,580, 800,500] },
+            { n: "Antártida", color: "#95a5a6", x: 500, y: 570, pts: [200,570, 800,570, 800,590, 200,590] }
+        ];
 
-    def clear(self):
-        for widget in self.root.winfo_children():
-            widget.destroy()
+        let energias = [];
+        let indexApagado = -1;
+        let startTime, timerInterval;
+        const IDEAL = 100 / 7;
 
-    def menu_principal(self):
-        self.clear()
-        frame = tk.Frame(self.root, bg="#111")
-        frame.pack(expand=True)
-
-        titulo = tk.Label(
-            frame,
-            text="BalancedGlobalEnergy",
-            font=("Arial", 38, "bold"),
-            fg="#00ffcc",
-            bg="#111"
-        )
-        titulo.pack(pady=50)
-
-        subtitulo = tk.Label(
-            frame,
-            text="Sistema mundial de equilibrio energético",
-            font=("Arial", 18),
-            fg="white",
-            bg="#111"
-        )
-        subtitulo.pack(pady=10)
-
-        botones = [
-            ("INICIAR PARTIDA", self.iniciar_partida),
-            ("PARTIDAS GUARDADAS", self.ver_partidas),
-            ("SALIR", self.root.quit)
-        ]
-
-        for texto, comando in botones:
-            tk.Button(
-                frame,
-                text=texto,
-                command=comando,
-                font=("Arial", 18, "bold"),
-                bg="#00aa88",
-                fg="white",
-                width=25,
-                height=2
-            ).pack(pady=15)
-
-    def iniciar_partida(self):
-        self.clear()
-        self.start_time = time.time()
-        self.apagado = random.choice(CONTINENTES)
-        self.energias = {}
-        restantes = 100
-        activos = [c for c in CONTINENTES if c != self.apagado]
-        porcentajes = []
-
-        for i in range(len(activos) - 1):
-            valor = random.randint(8, 24)
-            porcentajes.append(valor)
-            restantes -= valor
-
-        porcentajes.append(restantes)
-        random.shuffle(porcentajes)
-
-        for i, c in enumerate(activos):
-            self.energias[c] = porcentajes[i]
-
-        self.energias[self.apagado] = 0
-
-        notebook = ttk.Notebook(self.root)
-        notebook.pack(fill="both", expand=True)
-
-        self.tab_mapa = tk.Frame(notebook, bg="#001219")
-        self.tab_pc = tk.Frame(notebook, bg="#111")
-
-        notebook.add(self.tab_mapa, text="Mapa Mundial")
-        notebook.add(self.tab_pc, text="Ordenador IA")
-
-        self.crear_mapa()
-        self.crear_pc()
-
-    def crear_mapa(self):
-        self.timer = tk.Label(
-            self.tab_mapa,
-            text="Tiempo: 0s",
-            font=("Arial", 18, "bold"),
-            fg="white",
-            bg="#001219"
-        )
-        self.timer.pack(pady=10)
-
-        self.canvas = tk.Canvas(
-            self.tab_mapa,
-            width=1300,
-            height=700,
-            bg="#0a1f2e",
-            highlightthickness=0
-        )
-        self.canvas.pack(pady=10)
-
-        self.actualizar_tiempo()
-        colores = {
-            "América Norte": "#3498db",
-            "América Sur": "#2ecc71",
-            "Europa": "#f1c40f",
-            "África": "#e67e22",
-            "Asia": "#e74c3c",
-            "Oceanía": "#9b59b6",
-            "Antártida": "#95a5a6"
+        function showScreen(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
 
-        def color_cont(cont):
-            return "black" if cont == self.apagado else colores[cont]
+        function startGame() {
+            showScreen('screen-game');
+            indexApagado = Math.floor(Math.random() * 7);
+            
+            // Generar energías aleatorias
+            let pool = 100;
+            energias = new Array(7).fill(0);
+            let activos = [0,1,2,3,4,5,6].filter(i => i !== indexApagado);
+            
+            activos.forEach((idx, i) => {
+                if (i === activos.length - 1) {
+                    energias[idx] = pool;
+                } else {
+                    let val = Math.floor(Math.random() * 15) + 5;
+                    energias[idx] = val;
+                    pool -= val;
+                }
+            });
 
-        self.canvas.create_text(650, 40, text="BALANCED GLOBAL ENERGY MAP", fill="white", font=("Arial", 24, "bold"))
+            startTime = Date.now();
+            timerInterval = setInterval(updateTimer, 1000);
+            updateUI();
+        }
 
-        # Dibujo de Polígonos Simplificados
-        self.canvas.create_polygon(80, 120, 240, 80, 310, 150, 290, 260, 180, 320, 100, 250, fill=color_cont("América Norte"), outline="white", width=3)
-        self.canvas.create_text(190, 190, text=f"1\nAmérica Norte\n{self.energias['América Norte']}%", fill="white", font=("Arial", 12, "bold"))
+        function updateTimer() {
+            let segs = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('timer-display').innerText = `Tiempo: ${segs}s`;
+        }
 
-        self.canvas.create_polygon(260, 340, 330, 420, 350, 560, 300, 650, 240, 600, 210, 480, fill=color_cont("América Sur"), outline="white", width=3)
-        self.canvas.create_text(290, 500, text=f"2\nAmérica Sur\n{self.energias['América Sur']}%", fill="white", font=("Arial", 12, "bold"))
+        function updateUI() {
+            drawMap();
+            updateConsole();
+        }
 
-        self.canvas.create_polygon(520, 120, 610, 100, 660, 160, 620, 220, 540, 200, fill=color_cont("Europa"), outline="white", width=3)
-        self.canvas.create_text(590, 160, text=f"3\nEuropa\n{self.energias['Europa']}%", fill="white", font=("Arial", 12, "bold"))
+        function drawMap() {
+            const canvas = document.getElementById('game-canvas');
+            const ctx = canvas.getContext('2d');
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        self.canvas.create_polygon(560, 260, 670, 280, 720, 420, 640, 560, 540, 520, 500, 360, fill=color_cont("África"), outline="white", width=3)
-        self.canvas.create_text(620, 400, text=f"4\nÁfrica\n{self.energias['África']}%", fill="white", font=("Arial", 12, "bold"))
+            CONTINENTES.forEach((cont, i) => {
+                ctx.beginPath();
+                ctx.moveTo(cont.pts[0], cont.pts[1]);
+                for(let p=2; p<cont.pts.length; p+=2) ctx.lineTo(cont.pts[p], cont.pts[p+1]);
+                ctx.closePath();
+                
+                ctx.fillStyle = (i === indexApagado) ? "#000" : cont.color;
+                ctx.fill();
+                ctx.strokeStyle = "white";
+                ctx.lineWidth = 2;
+                ctx.stroke();
 
-        self.canvas.create_polygon(760, 120, 1050, 100, 1180, 240, 1110, 380, 980, 400, 850, 330, 720, 220, fill=color_cont("Asia"), outline="white", width=3)
-        self.canvas.create_text(950, 250, text=f"5\nAsia\n{self.energias['Asia']}%", fill="white", font=("Arial", 12, "bold"))
+                ctx.fillStyle = "white";
+                ctx.font = "bold 14px Arial";
+                ctx.fillText(`${i+1}. ${cont.n}`, cont.x - 40, cont.y);
+                ctx.fillText(`${energias[i].toFixed(1)}%`, cont.x - 20, cont.y + 20);
+            });
+        }
 
-        self.canvas.create_polygon(1030, 470, 1130, 500, 1160, 580, 1080, 620, 980, 570, fill=color_cont("Oceanía"), outline="white", width=3)
-        self.canvas.create_text(1080, 560, text=f"6\nOceanía\n{self.energias['Oceanía']}%", fill="white", font=("Arial", 12, "bold"))
+        function updateConsole() {
+            let html = `=== RED ELÉCTRICA GLOBAL ===<br>CONTINENTE APAGADO: ${CONTINENTES[indexApagado].n}<br><br>`;
+            CONTINENTES.forEach((c, i) => {
+                html += `${i+1}. ${c.n} --> ${energias[i].toFixed(1)}%<br>`;
+            });
+            html += `<br>OBJETIVO IDEAL: ${IDEAL.toFixed(2)}%`;
+            document.getElementById('ia-console').innerHTML = html;
+        }
 
-        self.canvas.create_rectangle(350, 650, 950, 690, fill=color_cont("Antártida"), outline="white", width=3)
-        self.canvas.create_text(650, 670, text=f"7 Antártida {self.energias['Antártida']}%", fill="white", font=("Arial", 12, "bold"))
+        function switchTab(type) {
+            document.getElementById('content-map').style.display = type === 'map' ? 'block' : 'none';
+            document.getElementById('content-ia').style.display = type === 'ia' ? 'block' : 'none';
+            document.getElementById('tab-map').classList.toggle('active-tab', type === 'map');
+            document.getElementById('tab-ia').classList.toggle('active-tab', type === 'ia');
+            if(type === 'map') drawMap();
+        }
 
-    def crear_pc(self):
-        titulo = tk.Label(self.tab_pc, text="SISTEMA DE IA ENERGÉTICA", font=("Consolas", 28, "bold"), fg="#00ff99", bg="#111")
-        titulo.pack(pady=20)
-        info = tk.Label(self.tab_pc, text=f"CONTINENTE APAGADO: {self.apagado}", font=("Arial", 18, "bold"), fg="white", bg="#111")
-        info.pack(pady=10)
+        function executeTransfer() {
+            let originIdx = parseInt(document.getElementById('input-origin').value) - 1;
+            let amount = parseFloat(document.getElementById('input-amount').value);
 
-        pantalla = tk.Frame(self.tab_pc, bg="black", bd=5, relief="ridge")
-        pantalla.pack(pady=20)
+            if (isNaN(originIdx) || originIdx < 0 || originIdx > 6 || originIdx === indexApagado) {
+                alert("Índice de continente no válido."); return;
+            }
+            if (isNaN(amount) || amount <= 0 || amount > energias[originIdx]) {
+                alert("Cantidad no válida."); return;
+            }
 
-        texto = tk.Text(pantalla, width=60, height=15, bg="black", fg="#00ff99", font=("Consolas", 12))
-        texto.pack()
-        texto.insert(tk.END, "=== RED ELÉCTRICA GLOBAL ===\n\n")
+            energias[originIdx] -= amount;
+            energias[indexApagado] += amount;
 
-        for i, cont in enumerate(CONTINENTES):
-            texto.insert(tk.END, f"{i+1}. {cont} --> {self.energias[cont]}%\n")
+            checkWin();
+            updateUI();
+        }
 
-        texto.insert(tk.END, f"\nOBJETIVO IDEAL: {round(IDEAL, 2)}% POR CONTINENTE")
-        texto.config(state="disabled")
+        function checkWin() {
+            let diff = energias.reduce((acc, val) => acc + Math.abs(val - IDEAL), 0);
+            let precision = Math.max(0, Math.floor(100 - diff * 2));
+            
+            // Si el jugador decide terminar (en esta versión web se asume que cada transferencia acerca al final)
+            // Para ser fieles al original, podrías añadir un botón de "Finalizar Misión"
+            // Aquí lo activamos si la precisión es alta o tras una acción.
+            if (precision > 50) {
+                if(confirm(`Precisión actual: ${precision}%. ¿Deseas finalizar la misión?`)) {
+                    finishGame(precision);
+                }
+            }
+        }
 
-        tk.Label(self.tab_pc, text="Número del continente origen", font=("Arial", 14), fg="white", bg="#111").pack()
-        self.input_cont = tk.Entry(self.tab_pc, font=("Arial", 16))
-        self.input_cont.pack(pady=10)
+        function finishGame(precision) {
+            clearInterval(timerInterval);
+            let totalTime = Math.floor((Date.now() - startTime) / 1000);
+            document.getElementById('final-stats').innerText = `Tiempo: ${totalTime}s | Precisión: ${precision}%`;
+            
+            // Guardar en LocalStorage (Simulando el JSON)
+            let history = JSON.parse(localStorage.getItem('energy_history') || '[]');
+            history.push({ 
+                date: new Date().toLocaleDateString(), 
+                time: totalTime, 
+                precision: precision 
+            });
+            localStorage.setItem('energy_history', JSON.stringify(history));
 
-        tk.Label(self.tab_pc, text="Porcentaje de energía a transferir", font=("Arial", 14), fg="white", bg="#111").pack()
-        self.input_energia = tk.Entry(self.tab_pc, font=("Arial", 16))
-        self.input_energia.pack(pady=10)
+            showScreen('screen-end');
+        }
 
-        tk.Button(self.tab_pc, text="EJECUTAR IA", font=("Arial", 18, "bold"), bg="#00aa88", fg="white", padx=30, pady=15, command=self.resolver).pack(pady=30)
+        function showHistory() {
+            showScreen('screen-history');
+            let history = JSON.parse(localStorage.getItem('energy_history') || '[]');
+            let tbody = document.querySelector('#history-body tbody');
+            tbody.innerHTML = history.map(h => `
+                <tr>
+                    <td>${h.date}</td>
+                    <td>${h.time}s</td>
+                    <td>${h.precision}%</td>
+                </tr>
+            `).join('');
+        }
 
-    def actualizar_tiempo(self):
-        try:
-            tiempo = int(time.time() - self.start_time)
-            if self.timer.winfo_exists():
-                self.timer.config(text=f"Tiempo: {tiempo}s")
-                self.root.after(1000, self.actualizar_tiempo)
-        except: pass
-
-    def resolver(self):
-        try:
-            indice = int(self.input_cont.get()) - 1
-            cantidad = float(self.input_energia.get())
-            if indice < 0 or indice >= len(CONTINENTES): return
-            origen = CONTINENTES[indice]
-            if origen == self.apagado or cantidad <= 0 or self.energias[origen] < cantidad: return
-
-            self.energias[origen] -= cantidad
-            self.energias[self.apagado] += cantidad
-
-            diferencia = sum(abs(valor - IDEAL) for valor in self.energias.values())
-            precision = max(0, int(100 - diferencia * 2))
-            tiempo = int(time.time() - self.start_time)
-
-            self.guardar_partida(tiempo, precision)
-            self.final(tiempo, precision)
-        except Exception as e: print("ERROR:", e)
-
-    def guardar_partida(self, tiempo, precision):
-        datos = []
-        try:
-            if os.path.exists(ARCHIVO_PARTIDAS):
-                with open(ARCHIVO_PARTIDAS, "r", encoding="utf-8") as f:
-                    datos = json.load(f)
-        except: pass
-
-        ahora = datetime.now()
-        datos.append({
-            "fecha": ahora.strftime("%Y-%m-%d"),
-            "hora": ahora.strftime("%H:%M:%S"),
-            "tiempo": tiempo,
-            "precision": precision
-        })
-
-        try:
-            with open(ARCHIVO_PARTIDAS, "w", encoding="utf-8") as f:
-                json.dump(datos, f, indent=4, ensure_ascii=False)
-        except: pass
-
-    def final(self, tiempo, precision):
-        self.clear()
-        frame = tk.Frame(self.root, bg="#111")
-        frame.pack(fill="both", expand=True)
-        tk.Label(frame, text="MISIÓN COMPLETADA", font=("Arial", 34, "bold"), fg="#00ff99", bg="#111").pack(pady=50)
-        tk.Label(frame, text=f"Tiempo empleado: {tiempo} segundos", font=("Arial", 20), fg="white", bg="#111").pack(pady=10)
-        tk.Label(frame, text=f"Precisión energética: {precision}%", font=("Arial", 20), fg="white", bg="#111").pack(pady=10)
-        tk.Button(frame, text="VOLVER AL MENÚ", font=("Arial", 16, "bold"), bg="#00aa88", fg="white", command=self.menu_principal).pack(pady=40)
-
-    def ver_partidas(self):
-        self.clear()
-        frame = tk.Frame(self.root, bg="#111")
-        frame.pack(fill="both", expand=True)
-        tk.Label(frame, text="PARTIDAS GUARDADAS", font=("Arial", 28, "bold"), fg="white", bg="#111").pack(pady=20)
-        
-        lista = tk.Listbox(frame, width=90, height=20, font=("Consolas", 12))
-        lista.pack(pady=20)
-
-        try:
-            with open(ARCHIVO_PARTIDAS, "r", encoding="utf-8") as f:
-                datos = json.load(f)
-            for p in datos:
-                lista.insert(tk.END, f"{p['fecha']} {p['hora']} | Tiempo: {p['tiempo']}s | Precisión: {p['precision']}%")
-        except:
-            lista.insert(tk.END, "No hay partidas registradas.")
-
-        tk.Button(frame, text="VOLVER", font=("Arial", 16, "bold"), bg="#00aa88", fg="white", command=self.menu_principal).pack(pady=20)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    Juego(root)
-    root.mainloop()
-    </code></pre>
-</div>
-
-<!-- Script para el resaltado de sintaxis -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-core.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>
-
+        function showMenu() { showScreen('screen-menu'); }
+    </script>
 </body>
 </html>
