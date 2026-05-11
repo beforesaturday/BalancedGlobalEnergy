@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BalancedGlobalEnergy</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>BalancedGlobalEnergy - Mobile</title>
     <style>
         :root {
             --primary: #00ffcc;
@@ -14,149 +14,145 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background-color: var(--bg-dark);
             color: white;
             margin: 0;
+            padding: 0;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
         }
 
-        .screen { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; }
+        .screen { display: none; width: 100%; min-height: 100vh; flex-direction: column; align-items: center; justify-content: center; padding: 20px; box-sizing: border-box; }
         .active { display: flex; }
 
-        /* Menú Principal */
-        h1 { font-size: 38pt; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-align: center; }
-        .subtitle { font-size: 18pt; margin-bottom: 50px; text-align: center; }
+        /* Tipografía adaptable */
+        h1 { font-size: 8vw; font-weight: bold; color: var(--primary); margin-bottom: 10px; text-align: center; }
+        .subtitle { font-size: 4.5vw; margin-bottom: 40px; text-align: center; opacity: 0.9; }
         
         button {
             background-color: var(--accent);
             color: white;
             border: none;
-            width: 400px;
-            height: 60px;
-            font-size: 18pt;
+            width: 85%;
+            max-width: 400px;
+            padding: 18px;
+            font-size: 1.2rem;
             font-weight: bold;
-            margin: 15px;
+            margin: 10px;
             cursor: pointer;
-            border-radius: 5px;
-            transition: 0.2s;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
-        button:hover { filter: brightness(1.2); }
-        .btn-small { width: 200px; height: 40px; font-size: 12pt; margin: 10px; background-color: #444; }
 
-        /* Pestañas (Notebook) */
-        .notebook { width: 1400px; height: 850px; display: flex; flex-direction: column; }
-        .tabs { display: flex; background: #222; }
-        .tab { padding: 10px 30px; cursor: pointer; background: #333; border: 1px solid #444; }
-        .tab.active-tab { background: #111; border-bottom: none; color: var(--primary); }
-        .content { flex-grow: 1; display: none; position: relative; }
+        /* Sistema de Pestañas Móvil */
+        .notebook { width: 100%; max-width: 600px; display: flex; flex-direction: column; height: 90vh; }
+        .tabs { display: flex; background: #222; border-radius: 10px 10px 0 0; }
+        .tab { flex: 1; padding: 15px; text-align: center; cursor: pointer; background: #333; border: 1px solid #444; font-size: 0.9rem; }
+        .tab.active-tab { background: #111; border-bottom: none; color: var(--primary); font-weight: bold; }
+        
+        .content { flex-grow: 1; display: none; position: relative; background: #001219; border-radius: 0 0 10px 10px; overflow-y: auto; }
         .content.active-content { display: block; }
 
-        /* Mapa */
-        #map-canvas { background-color: var(--bg-map); margin-top: 10px; }
-        #timer { font-size: 18pt; font-weight: bold; margin-top: 10px; }
+        /* Canvas Responsivo */
+        #map-canvas { 
+            width: 100% !important; 
+            height: auto !important; 
+            background-color: var(--bg-map);
+        }
 
-        /* Consola IA */
-        .pc-container { text-align: center; padding: 20px; }
+        /* Consola IA Móvil */
+        .pc-container { padding: 15px; }
         .console-box {
             background: black;
-            border: 5px ridge #555;
-            width: 600px;
-            height: 280px;
+            border: 3px ridge #444;
+            width: 90%;
+            height: 220px;
             margin: 10px auto;
             color: var(--neon-green);
             font-family: 'Consolas', monospace;
+            font-size: 0.85rem;
             text-align: left;
-            padding: 15px;
+            padding: 10px;
             overflow-y: auto;
-            white-space: pre-wrap;
         }
         input {
-            font-size: 16pt;
-            padding: 5px;
-            width: 300px;
-            margin: 5px;
+            font-size: 1.2rem;
+            padding: 12px;
+            width: 80%;
+            margin: 8px;
             background: #222;
-            border: 1px solid #444;
+            border: 2px solid var(--accent);
             color: white;
+            border-radius: 8px;
             text-align: center;
         }
 
         /* Historial */
         .listbox {
-            background: white;
+            background: #eee;
             color: black;
-            width: 800px;
-            height: 400px;
+            width: 95%;
+            height: 60vh;
             overflow-y: auto;
-            font-family: 'Consolas', monospace;
-            margin: 20px;
-            text-align: left;
+            font-family: monospace;
+            margin: 15px 0;
             padding: 10px;
+            border-radius: 8px;
         }
-        .list-item { padding: 5px; border-bottom: 1px solid #ccc; }
+        .list-item { padding: 10px; border-bottom: 1px solid #ccc; font-size: 0.8rem; }
     </style>
 </head>
 <body>
 
-    <!-- SCREEN: MENU -->
+    <!-- PANTALLA INICIO -->
     <div id="screen-menu" class="screen active">
-        <h1>BalancedGlobalEnergy</h1>
-        <div class="subtitle">Sistema mundial de equilibrio energético</div>
+        <h1>Balanced<br>GlobalEnergy</h1>
+        <div class="subtitle">Equilibrio Energético Mundial</div>
         <button onclick="iniciarPartida()">INICIAR PARTIDA</button>
-        <button onclick="verPartidas()">PARTIDAS GUARDADAS</button>
+        <button onclick="verPartidas()">HISTORIAL</button>
     </div>
 
-    <!-- SCREEN: GAME -->
-    <div id="screen-game" class="screen">
+    <!-- PANTALLA JUEGO -->
+    <div id="screen-game" class="screen" style="padding: 5px;">
         <div class="notebook">
             <div class="tabs">
-                <div id="t-map" class="tab active-tab" onclick="switchTab('map')">Mapa Mundial</div>
-                <div id="t-pc" class="tab" onclick="switchTab('pc')">Ordenador IA</div>
+                <div id="t-map" class="tab active-tab" onclick="switchTab('map')">MAPA</div>
+                <div id="t-pc" class="tab" onclick="switchTab('pc')">CONSOLA IA</div>
             </div>
 
-            <!-- Tab Mapa -->
-            <div id="c-map" class="content active-content" style="background-color: #001219; text-align: center;">
-                <div id="timer">Tiempo: 0s</div>
-                <canvas id="map-canvas" width="1300" height="700"></canvas>
+            <div id="c-map" class="content active-content">
+                <div id="timer" style="text-align: center; padding: 10px; font-weight: bold;">Tiempo: 0s</div>
+                <canvas id="map-canvas" width="1300" height="1300"></canvas>
             </div>
 
-            <!-- Tab PC IA -->
             <div id="c-pc" class="content" style="background-color: #111;">
                 <div class="pc-container">
-                    <div style="font-size: 28pt; font-weight: bold; color: var(--neon-green); font-family: Consolas;">SISTEMA DE IA ENERGÉTICA</div>
-                    <div id="info-apagado" style="font-size: 18pt; margin: 10px;">CONTINENTE APAGADO: ---</div>
-                    
+                    <div id="info-apagado" style="font-weight: bold; color: var(--primary); margin-bottom: 5px;">APAGÓN EN: ---</div>
                     <div class="console-box" id="ia-text"></div>
-
-                    <label style="font-size: 12pt;">Número del continente origen</label><br>
-                    <input type="number" id="input-cont" min="1" max="7"><br>
-                    <label style="font-size: 12pt;">Porcentaje de energía a transferir</label><br>
-                    <input type="number" id="input-energia" step="0.1"><br>
-                    
-                    <button onclick="resolver()" style="width: 250px; margin-top: 10px; height: 50px;">EJECUTAR IA</button>
-                    <br>
-                    <button onclick="showScreen('screen-menu')" class="btn-small">VOLVER AL MENÚ</button>
+                    <input type="number" id="input-cont" placeholder="ID Continente (1-7)">
+                    <input type="number" id="input-energia" placeholder="% a transferir">
+                    <button onclick="resolver()" style="width: 90%; height: 55px; background: var(--neon-green); color: black;">EJECUTAR</button>
+                    <button onclick="showScreen('screen-menu')" style="background: #444; width: 90%; font-size: 1rem; height: 45px;">ABANDONAR</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SCREEN: FINAL -->
+    <!-- PANTALLA FINAL -->
     <div id="screen-final" class="screen">
-        <h1 style="color: var(--neon-green);">MISIÓN COMPLETADA</h1>
-        <div id="final-tiempo" class="subtitle" style="margin-bottom: 10px;">Tiempo empleado: 0 segundos</div>
-        <div id="final-precision" class="subtitle">Precisión energética: 0%</div>
-        <button onclick="showScreen('screen-menu')" style="margin-top: 40px;">VOLVER AL MENÚ</button>
+        <h1 style="color: var(--neon-green);">¡MISIÓN LOGRADA!</h1>
+        <div id="final-tiempo" class="subtitle"></div>
+        <div id="final-precision" class="subtitle"></div>
+        <button onclick="showScreen('screen-menu')">VOLVER AL INICIO</button>
     </div>
 
-    <!-- SCREEN: HISTORIAL -->
+    <!-- PANTALLA HISTORIAL -->
     <div id="screen-history" class="screen">
-        <h1 style="color: white;">PARTIDAS GUARDADAS</h1>
+        <h1>REGISTROS</h1>
         <div id="history-list" class="listbox"></div>
         <button onclick="showScreen('screen-menu')">VOLVER</button>
     </div>
@@ -167,7 +163,7 @@
             "América Norte": "#3498db", "América Sur": "#2ecc71", "Europa": "#f1c40f",
             "África": "#e67e22", "Asia": "#e74c3c", "Oceanía": "#9b59b6", "Antártida": "#95a5a6"
         };
-        const IDEAL = 100 / CONTINENTES.length;
+        const IDEAL = 14.28; // 100 / 7
 
         let energias = {};
         let apagado = "";
@@ -180,10 +176,16 @@
             if(id === 'screen-menu') clearInterval(timerInterval);
         }
 
+        function switchTab(tab) {
+            document.getElementById('t-map').className = tab === 'map' ? 'tab active-tab' : 'tab';
+            document.getElementById('t-pc').className = tab === 'pc' ? 'tab active-tab' : 'tab';
+            document.getElementById('c-map').className = tab === 'map' ? 'content active-content' : 'content';
+            document.getElementById('c-pc').className = tab === 'pc' ? 'content active-content' : 'content';
+        }
+
         function iniciarPartida() {
             showScreen('screen-game');
             switchTab('map');
-            
             startTime = Date.now();
             apagado = CONTINENTES[Math.floor(Math.random() * CONTINENTES.length)];
             
@@ -192,7 +194,7 @@
             let porcentajes = [];
 
             for(let i=0; i < activos.length - 1; i++) {
-                let valor = Math.floor(Math.random() * (24 - 8 + 1)) + 8;
+                let valor = Math.floor(Math.random() * 16) + 8;
                 porcentajes.push(valor);
                 restantes -= valor;
             }
@@ -202,22 +204,11 @@
             CONTINENTES.forEach(c => energias[c] = 0);
             activos.forEach((c, i) => energias[c] = porcentajes[i]);
 
-            document.getElementById('info-apagado').innerText = `CONTINENTE APAGADO: ${apagado.toUpperCase()}`;
-            
-            timerInterval = setInterval(actualizarTiempo, 1000);
+            document.getElementById('info-apagado').innerText = `APAGÓN EN: ${apagado.toUpperCase()}`;
+            timerInterval = setInterval(() => {
+                document.getElementById('timer').innerText = `Tiempo: ${Math.floor((Date.now() - startTime) / 1000)}s`;
+            }, 1000);
             updateUI();
-        }
-
-        function actualizarTiempo() {
-            let tiempo = Math.floor((Date.now() - startTime) / 1000);
-            document.getElementById('timer').innerText = `Tiempo: ${tiempo}s`;
-        }
-
-        function switchTab(tab) {
-            document.getElementById('t-map').className = tab === 'map' ? 'tab active-tab' : 'tab';
-            document.getElementById('t-pc').className = tab === 'pc' ? 'tab active-tab' : 'tab';
-            document.getElementById('c-map').className = tab === 'map' ? 'content active-content' : 'content';
-            document.getElementById('c-pc').className = tab === 'pc' ? 'content active-content' : 'content';
         }
 
         function updateUI() {
@@ -230,50 +221,47 @@
             const ctx = canvas.getContext('2d');
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            ctx.fillStyle = "white";
-            ctx.font = "bold 24pt Arial";
-            ctx.textAlign = "center";
-            ctx.fillText("BALANCED GLOBAL ENERGY MAP", 650, 60);
-
             function drawPolygon(pts, name, id, x, y) {
                 ctx.beginPath();
                 ctx.moveTo(pts[0], pts[1]);
                 for(let i=2; i<pts.length; i+=2) ctx.lineTo(pts[i], pts[i+1]);
                 ctx.closePath();
-                ctx.fillStyle = (name === apagado) ? "black" : COLORES[name];
+                ctx.fillStyle = (name === apagado) ? "#000" : COLORES[name];
                 ctx.fill();
                 ctx.strokeStyle = "white";
-                ctx.lineWidth = 3;
+                ctx.lineWidth = 5;
                 ctx.stroke();
 
                 ctx.fillStyle = "white";
-                ctx.font = "bold 12pt Arial";
-                ctx.fillText(`${id}`, x, y-20);
-                ctx.fillText(name, x, y);
-                ctx.fillText(`${energias[name]}%`, x, y+20);
+                ctx.font = "bold 35px Arial";
+                ctx.textAlign = "center";
+                ctx.fillText(`${id}. ${name}`, x, y);
+                ctx.fillText(`${energias[name]}%`, x, y + 45);
             }
 
-            drawPolygon([80,120, 240,80, 310,150, 290,260, 180,320, 100,250], "América Norte", 1, 190, 190);
-            drawPolygon([260,340, 330,420, 350,560, 300,650, 240,600, 210,480], "América Sur", 2, 290, 500);
-            drawPolygon([520,120, 610,100, 660,160, 620,220, 540,200], "Europa", 3, 590, 160);
-            drawPolygon([560,260, 670,280, 720,420, 640,560, 540,520, 500,360], "África", 4, 620, 400);
-            drawPolygon([760,120, 1050,100, 1180,240, 1110,380, 980,400, 850,330, 720,220], "Asia", 5, 950, 250);
-            drawPolygon([1030,470, 1130,500, 1160,580, 1080,620, 980,570], "Oceanía", 6, 1080, 560);
+            // Coordenadas ajustadas para vista vertical de móvil
+            drawPolygon([100,100, 500,50, 600,300, 300,500, 50,400], "América Norte", 1, 300, 250);
+            drawPolygon([150,550, 450,550, 450,900, 150,900], "América Sur", 2, 300, 750);
+            drawPolygon([700,50, 1100,50, 1100,250, 700,250], "Europa", 3, 900, 150);
+            drawPolygon([650,350, 1000,350, 1000,750, 650,750], "África", 4, 825, 550);
+            drawPolygon([1050,300, 1250,300, 1250,800, 1050,800], "Asia", 5, 1150, 550);
+            drawPolygon([800,850, 1200,850, 1200,1100, 800,1100], "Oceanía", 6, 1000, 1000);
             
+            // Antártida base
             ctx.fillStyle = (apagado === "Antártida") ? "black" : COLORES["Antártida"];
-            ctx.fillRect(350, 650, 600, 40);
+            ctx.fillRect(100, 1150, 1100, 100);
             ctx.strokeStyle = "white";
-            ctx.strokeRect(350, 650, 600, 40);
+            ctx.strokeRect(100, 1150, 1100, 100);
             ctx.fillStyle = "white";
-            ctx.fillText(`7 Antártida ${energias["Antártida"]}%`, 650, 675);
+            ctx.fillText("7. Antártida " + energias["Antártida"] + "%", 650, 1215);
         }
 
         function renderConsola() {
-            let txt = "=== RED ELÉCTRICA GLOBAL ===\n\n";
+            let txt = "ESTADO DE CARGA:\n\n";
             CONTINENTES.forEach((c, i) => {
-                txt += `${i+1}. ${c} --> ${energias[c]}%\n`;
+                txt += `${i+1}. ${c.padEnd(15)} > ${energias[c]}%\n`;
             });
-            txt += `\nOBJETIVO IDEAL: ${IDEAL.toFixed(2)}% POR CONTINENTE`;
+            txt += `\nOBJETIVO: ${IDEAL}% c/u`;
             document.getElementById('ia-text').innerText = txt;
         }
 
@@ -281,11 +269,11 @@
             let idx = parseInt(document.getElementById('input-cont').value) - 1;
             let cant = parseFloat(document.getElementById('input-energia').value);
 
-            if(isNaN(idx) || idx < 0 || idx >= 7) return;
+            if(isNaN(idx) || idx < 0 || idx >= 7 || isNaN(cant)) return;
             let origen = CONTINENTES[idx];
 
             if(origen === apagado || cant <= 0 || energias[origen] < cant) {
-                alert("Operación inválida: Verifique ID o Energía disponible");
+                alert("Error: Datos inválidos o energía insuficiente");
                 return;
             }
 
@@ -297,38 +285,30 @@
             let precision = Math.max(0, Math.floor(100 - diferencia * 2));
             let tiempo = Math.floor((Date.now() - startTime) / 1000);
 
-            guardarPartida(tiempo, precision);
-            
-            document.getElementById('final-tiempo').innerText = `Tiempo empleado: ${tiempo} segundos`;
-            document.getElementById('final-precision').innerText = `Precisión energética: ${precision}%`;
-            showScreen('screen-final');
+            if(energias[apagado] > 0) {
+                guardarPartida(tiempo, precision);
+                document.getElementById('final-tiempo').innerText = `Tiempo: ${tiempo}s`;
+                document.getElementById('final-precision').innerText = `Precisión: ${precision}%`;
+                showScreen('screen-final');
+            } else {
+                updateUI();
+            }
         }
 
         function guardarPartida(t, p) {
-            let partidas = JSON.parse(localStorage.getItem('partidas_energy') || '[]');
-            let ahora = new Date();
-            partidas.push({
-                fecha: ahora.toISOString().split('T')[0],
-                hora: ahora.toTimeString().split(' ')[0],
-                tiempo: t,
-                precision: p
-            });
-            localStorage.setItem('partidas_energy', JSON.stringify(partidas));
+            let partidas = JSON.parse(localStorage.getItem('energy_saves') || '[]');
+            partidas.push({ fecha: new Date().toLocaleDateString(), tiempo: t, precision: p });
+            localStorage.setItem('energy_saves', JSON.stringify(partidas));
         }
 
         function verPartidas() {
             showScreen('screen-history');
-            let partidas = JSON.parse(localStorage.getItem('partidas_energy') || '[]');
+            let partidas = JSON.parse(localStorage.getItem('energy_saves') || '[]');
             let list = document.getElementById('history-list');
-            list.innerHTML = "";
-            
-            if(partidas.length === 0) {
-                list.innerHTML = "<div class='list-item'>No hay partidas guardadas</div>";
-            } else {
-                partidas.reverse().forEach(p => {
-                    list.innerHTML += `<div class='list-item'>${p.fecha} ${p.hora} | Tiempo: ${p.tiempo}s | Precisión: ${p.precision}%</div>`;
-                });
-            }
+            list.innerHTML = partidas.length ? "" : "No hay registros";
+            partidas.reverse().forEach(p => {
+                list.innerHTML += `<div class='list-item'>${p.fecha} | ${p.tiempo}s | Precisión: ${p.precision}%</div>`;
+            });
         }
     </script>
 </body>
